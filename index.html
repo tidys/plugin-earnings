@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>插件收益</title>
+</head>
+<script src="g2.min.js"></script>
+
+<body>
+
+
+<div id="c1" style="width: 100%;height: 500px;margin-top: 100px;">
+
+</div>
+<script src="data.js" type="text/javascript"></script>
+<script>
+    let c1 = document.getElementById('c1');
+    let width = c1.offsetWidth;
+    let height = c1.offsetHeight;
+
+
+    function drawMonth() {
+
+        let data = [
+            {time: '2017/09', income: 0.65, plugin: "字体瘦身(1元)"},
+            {time: '2017/10', income: 3.92, plugin: "位图字体生成工具(2元)"},
+            {time: '2017/11', income: 25.5},
+            {time: '2017/12', income: 15.04},
+
+            {time: '2018/01', income: 11.77},
+            {time: '2018/02', income: 14.38},
+            {time: '2018/03', income: 17.65},
+            {time: '2018/04', income: 39.88, plugin: "位图字体生成工具(5元)"},
+            {time: '2018/05', income: 65.38},
+            {time: '2018/06', income: 24.84},
+            {time: '2018/07', income: 34},
+            {time: '2018/08', income: 49.69},
+            {time: '2018/09', income: 62.76},
+            {time: '2018/10', income: 378.55, plugin: "cc-inspector+(2元)=>(6元)"},
+            {time: '2018/11', income: 228.83, plugin: "颜色拾取器(3元)"},
+            {time: '2018/12', income: 149.72, plugin: "场景预览助手(1.5元)"},
+
+            {time: '2019/01', income: 172.60, plugin: "位图字体生成工具(6元)"},
+            {time: '2019/02', income: 409.74, plugin: "场景预览助手(2元)\n粒子编辑(9.9元)"},
+            {time: '2019/03', income: 649.75},
+            {time: '2019/04', income: 665.5, plugin: "Story-Master(27元)"},
+        ]; // G2 对数据源格式的要求，仅仅是 JSON 数组，数组的每个元素是一个标准 JSON 对象。
+        // Step 1: 创建 Chart 对象
+        data = [];
+        let monthData = analyzeData.time.month;
+
+        for (let key in monthData) {
+            let item = monthData[key];
+            data.push({
+                time: key,
+                income: parseFloat(item.totalIncome.toString()),
+                event: item.event,
+            })
+
+        }
+
+
+        const chart = new G2.Chart({
+            container: 'c1', // 指定图表容器 ID
+            height: height, // 指定图表高度
+            forceFit: true,
+        });
+        chart.scale('income', {
+            tickInterval: 50,
+            alias: "收入"
+        });
+
+        chart.source(data);
+
+        chart.interval().position('time*income').color('#3c8eff');
+        chart.line().position('time*income').color('#ff9b1e');
+
+        for (let i = 0; i < data.length; i++) {
+            let item = data[i];
+            continue;
+            if (item.event) {
+                chart.guide().dataMarker({
+                    position: [item.time, item.income],
+                    content: item.event,
+                    lineLength: 30,
+                    autoAdjust: true,
+                    style: {
+                        text: {
+                            textAlign: 'center',
+                            stroke: '#fff',
+                            lineWidth: 2
+                        }
+                    }
+                });
+            }
+        }
+        chart.render();
+    }
+
+    drawMonth();
+
+    drawType();
+    drawDay();
+
+    function drawDay() {
+        const chart = new G2.Chart({
+            container: 'c1', // 指定图表容器 ID
+            height: height, // 指定图表高度
+            forceFit: true,
+        });
+        let data = [];
+        let source = analyzeData.time.day;
+        for (let key in source) {
+            let item = source[key];
+            data.push({
+                day: key,
+                income: parseFloat(item.totalIncome.toString()),
+                num: item.buy.length,
+            })
+        }
+        for (let i = 0; i < data.length; i++) {
+            let item = data[i];
+
+            chart.guide().dataMarker({
+                position: [item.name, item.income],
+                content: `销量:${item.num}份`,
+                lineLength: 30,
+                autoAdjust: true,
+                style: {
+                    text: {
+                        textAlign: 'center',
+                        stroke: '#fff',
+                        lineWidth: 2
+                    }
+                }
+            });
+
+        }
+        chart.source(data);
+        chart.scale('income', {
+            tickInterval: 2,
+            alias: "收入"
+        });
+        chart.line().position('day*income');
+        chart.render();
+    }
+
+    function drawType() {
+        const chart = new G2.Chart({
+            container: 'c1', // 指定图表容器 ID
+            height: height, // 指定图表高度
+            forceFit: true,
+        });
+        let data = [];
+        for (let key in analyzeData.type) {
+            data.push({
+                name: key,
+                income: parseFloat(analyzeData.type[key].totalIncome.toString()),
+                num: analyzeData.type[key].day.length,
+            })
+        }
+        data.sort(function (a, b) {
+            return a.income - b.income;
+        })
+        chart.source(data);
+        chart.scale('income', {
+            tickInterval: 50,
+            alias: "收入"
+        });
+        chart.interval().position('name*income');
+        for (let i = 0; i < data.length; i++) {
+            let item = data[i];
+
+            chart.guide().dataMarker({
+                position: [item.name, item.income],
+                content: `销量:${item.num}份`,
+                lineLength: 30,
+                autoAdjust: true,
+                style: {
+                    text: {
+                        textAlign: 'center',
+                        stroke: '#fff',
+                        lineWidth: 2
+                    }
+                }
+            });
+
+        }
+        chart.render();
+    }
+</script>
+</body>
+</html>

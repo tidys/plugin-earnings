@@ -1,0 +1,4 @@
+.idea
+node_modules/.bin
+node_modules
+cocos_store_sales.csv
