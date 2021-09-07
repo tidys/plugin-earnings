@@ -12,10 +12,10 @@ var allData = {
     // 按照时间
     time: {
         day: [
-            {time: "", name: "", total: 0, cur: 0, event: "[发布插件][调整价格]"},
+            { time: "", name: "", total: 0, cur: 0, event: "[发布插件][调整价格]" },
         ],
         month: [
-            {time: "", total: 0, cur: 0, event: ""}
+            { time: "", total: 0, cur: 0, event: "" }
         ]
     }
 
@@ -28,6 +28,10 @@ if (Fs.existsSync(excelFile)) {
     let excelData = Fs.readFileSync(excelFile);
     excelData = IconvLite.decode(excelData, "GB2312");
     let array = excelData.split('\n');
+    let moneys = {
+        price: 0,
+        income: 0,
+    };
     let resultArray = [];
     let allTypes = {};
     for (let i = 1; i < array.length; i++) {
@@ -45,7 +49,8 @@ if (Fs.existsSync(excelFile)) {
             price: sub(item[4]),
             income: sub(item[5]),
         };
-
+        moneys.income += parseFloat(itemData.income);
+        moneys.price += parseFloat(itemData.price)
         if (!allTypes[itemData.name]) {
             allTypes[itemData.name] = [];
         }
@@ -53,6 +58,12 @@ if (Fs.existsSync(excelFile)) {
 
         resultArray.push(itemData);
     }
+    console.log(`总共收入:${moneys.price}, 实际收入:${moneys.income}, 分成比率:${moneys.income / moneys.price}`)
+    console.log(`按照 "实际到账金额 = 提现金额 * (1 - 0.06 - 0.006) * (1 - 0.30)" 计算`)
+    let getMoney = moneys.price * (1 - 0.06 - 0.06) * (1 - 0.3);
+    getMoney = getMoney.toFixed(2);
+    console.log(`${getMoney} = ${moneys.price.toFixed(2)} * (1 - 0.06 - 0.006) * (1 - 0.30)`)
+
     // 按照时间先后进行了一次排序
     resultArray.sort(function (a, b) {
         let valueA = Moment(a.time).valueOf();
@@ -74,7 +85,7 @@ if (Fs.existsSync(excelFile)) {
     console.log("请到后台下载销售记录csv文件");
 }
 
-function sub(str) {
+function sub (str) {
     if (!str || !str.length) {
         debugger
     }
@@ -87,7 +98,7 @@ function sub(str) {
 }
 
 // 分析每天
-function analyzeDay(data) {
+function analyzeDay (data) {
     let all = JSON.parse(JSON.stringify(data));
     // [发布插件][调整价格]
     let events = [];
@@ -138,7 +149,7 @@ function analyzeDay(data) {
 }
 
 // 分析每月
-function analyzeMonth(data, events) {
+function analyzeMonth (data, events) {
     let all = JSON.parse(JSON.stringify(data));
     let months = {};
     for (let i = 0; i < all.length; i++) {
@@ -177,7 +188,7 @@ function analyzeMonth(data, events) {
     allData.time.month = months;
 }
 
-function analyzeType(data) {
+function analyzeType (data) {
     let types = {};
     let all = JSON.parse(JSON.stringify(data));
     for (let i = 0; i < all.length; i++) {
@@ -204,7 +215,7 @@ function analyzeType(data) {
     allData.type = types;
 }
 
-function saveJS() {
+function saveJS () {
     let data = JSON.stringify(allData);
     Fs.writeFileSync(Path.join(__dirname, 'data.js'), `window.analyzeData=${data}`);
 
